@@ -12,9 +12,12 @@ add_subdirectory(epd)
 
 include_directories(epd/Config)
 include_directories(epd/GUI)
+include_directories(epd/e-Paper)
 
 add_executable(stock-ticker
     main.c
+    ticker.c
+    ticker_display.c
 )
 
 pico_enable_stdio_usb(stock-ticker 1)
