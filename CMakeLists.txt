@@ -20,8 +20,18 @@ add_executable(stock-ticker
     ticker_display.c
 )
 
+target_include_directories(stock-ticker PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
+        )
+
 pico_enable_stdio_usb(stock-ticker 1)
 pico_enable_stdio_uart(stock-ticker 1)
 
 pico_add_extra_outputs(stock-ticker)
-target_link_libraries(stock-ticker pico_stdlib epd)
+target_link_libraries(stock-ticker
+        pico_stdlib
+        pico_cyw43_arch_lwip_poll
+        pico_lwip_mbedtls
+        pico_mbedtls
+        epd
+        )
