@@ -9,4 +9,4 @@ typedef struct {
     float price;
 } ticker;
 
-bool get_ticker(char symbol[TICKER_LEN], ticker *ticker);
+bool get_ticker(char *symbol, ticker *ticker);

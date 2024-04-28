@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <string.h>
 
-bool get_ticker(char symbol[TICKER_LEN], ticker *ticker)
+bool get_ticker(char *symbol, ticker *ticker)
 {
     assert(ticker != NULL);
 
