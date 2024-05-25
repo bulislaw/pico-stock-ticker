@@ -91,9 +91,9 @@ void DEV_Delay_ms(UDOUBLE xms)
 void DEV_GPIO_Init(void)
 {
 
-	EPD_RST_PIN     = 1;
-	EPD_DC_PIN      = 0;
-	EPD_BUSY_PIN    = 2;
+	EPD_RST_PIN     = 12;
+	EPD_DC_PIN      = 8;
+	EPD_BUSY_PIN    = 13;
 	
 	EPD_CS_PIN      = 9;
 	EPD_CLK_PIN		= 10;
