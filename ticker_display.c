@@ -22,7 +22,7 @@ bool display_init()
     return true;
 }
 
-void display_tickers(ticker *ticker1, ticker *ticker2)
+void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
 {
     char buf[BUF_LEN + 1];
     Paint_NewImage(fb, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 270, WHITE);
@@ -44,6 +44,14 @@ void display_tickers(ticker *ticker1, ticker *ticker2)
     Paint_DrawString_EN(EPD_2in13_V4_HEIGHT / 2, 0, ticker2->symbol, &Font24, WHITE, BLACK);
     Paint_DrawString_EN(EPD_2in13_V4_HEIGHT / 2, 25, buf, &Font24, WHITE, BLACK);
 
+    // Draw a battery indicator in the bottom right corner, with one dot per 20% of the battery
+    // < 20% -> 0 dots; >80% -> 4 dots
+    Paint_DrawRectangle(EPD_2in13_V4_HEIGHT - 5, EPD_2in13_V4_WIDTH - 2, EPD_2in13_V4_HEIGHT,
+            EPD_2in13_V4_WIDTH, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+    int dots = battery / 20;
+    dots = dots > 4 ? 4 : dots;
+    Paint_DrawLine(EPD_2in13_V4_HEIGHT - 4, EPD_2in13_V4_WIDTH - 1, EPD_2in13_V4_HEIGHT - 5 + dots,
+            EPD_2in13_V4_WIDTH - 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
 
     EPD_2in13_V4_Display(fb);
 }

@@ -36,15 +36,13 @@ int main(void)
         puts("Fetching SPX ticker data failed\n");
     }
 
-    display_tickers(&arm, &spx);
-
     while (1) {
         sleep_ms(3000);
 
         arm.price = get_battery();
-        printf("Battery: %i\n", arm.price);
+        printf("Battery: %.2f\n", arm.price);
 
-        display_tickers(&arm, &spx);
+        display_tickers(&arm, &spx, arm.price);
     }
 
     cyw43_arch_deinit();
