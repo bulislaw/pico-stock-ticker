@@ -4,7 +4,7 @@
 
 #include "ticker_display.h"
 
-#define FB_SIZE ((EPD_2in13_V4_WIDTH / 8) * EPD_2in13_V4_HEIGHT)
+#define FB_SIZE (((EPD_2in13_V4_WIDTH / 8) + 1) * EPD_2in13_V4_HEIGHT)
 #define BUF_LEN 10
 
 UBYTE fb[FB_SIZE];
