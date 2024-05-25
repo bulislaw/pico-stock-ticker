@@ -18,6 +18,7 @@ add_executable(stock-ticker
     main.c
     ticker.c
     ticker_display.c
+    battery.c
 )
 
 target_include_directories(stock-ticker PRIVATE
@@ -29,6 +30,8 @@ pico_enable_stdio_uart(stock-ticker 1)
 
 pico_add_extra_outputs(stock-ticker)
 target_link_libraries(stock-ticker
+        hardware_adc
+        hardware_gpio
         pico_stdlib
         pico_cyw43_arch_lwip_poll
         pico_lwip_mbedtls
