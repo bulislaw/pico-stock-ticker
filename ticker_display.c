@@ -50,7 +50,9 @@ void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
             EPD_2in13_V4_WIDTH, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
     int dots = battery / 20;
     dots = dots > 4 ? 4 : dots;
-    Paint_DrawLine(EPD_2in13_V4_HEIGHT - 4, EPD_2in13_V4_WIDTH - 1, EPD_2in13_V4_HEIGHT - 5 + dots,
+    // Draw the dots, but start with one pixel to the left of the battery indicator square. It makes it look more
+    // like a battery indicator with the plus terminal sticking out.
+    Paint_DrawLine(EPD_2in13_V4_HEIGHT - 6, EPD_2in13_V4_WIDTH - 1, EPD_2in13_V4_HEIGHT - 6 + dots + 2,
             EPD_2in13_V4_WIDTH - 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
 
     EPD_2in13_V4_Display(fb);
