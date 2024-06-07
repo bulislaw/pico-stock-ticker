@@ -25,24 +25,23 @@ int main(void)
         return 1;
     }
 
-    ticker arm, spx;
-    bool res = get_ticker("ARM", &arm);
-    if (!res) {
-        puts("Fetching ARM ticker data failed\n");
-    }
-
-    res = get_ticker("SPX", &spx);
-    if (!res) {
-        puts("Fetching SPX ticker data failed\n");
-    }
+    printf("Connected with IP %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
 
     while (1) {
-        sleep_ms(3000);
+        ticker arm, spx;
 
-        arm.price = get_battery();
-        printf("Battery: %.2f\n", arm.price);
+        bool res = get_ticker("ARM", "ARM", &arm);
+        if (!res) {
+            puts("Fetching ARM ticker data failed\n");
+        }
 
-        display_tickers(&arm, &spx, arm.price);
+        res = get_ticker("%5ESPX", "SPX", &spx);
+        if (!res) {
+            puts("Fetching SPX ticker data failed\n");
+        }
+
+        display_tickers(&arm, &spx, get_battery());
+        sleep_ms(5000);
     }
 
     cyw43_arch_deinit();

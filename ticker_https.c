@@ -14,12 +14,23 @@
 #include "lwip/altcp_tls.h"
 #include "lwip/dns.h"
 
+#define TLS_HTTP_GET_TEMPLATE "GET %s HTTP/1.1\r\n" \
+                              "Host: %s\r\n" \
+                              "User-Agent: curl/8.6.0\r\n" \
+                              "Connection: close\r\n" \
+                              "\r\n"
+#define TLS_HTTP_GET_MAX_SIZE (sizeof(TLS_HTTP_GET_TEMPLATE) + 100)
+#define TLS_CLIENT_TIMEOUT_SECS  15
+
 typedef struct TLS_CLIENT_T_ {
     struct altcp_pcb *pcb;
     bool complete;
     int error;
-    const char *http_request;
+    char http_request[TLS_HTTP_GET_MAX_SIZE];
     int timeout;
+    char *buf;
+    size_t buf_len;
+    size_t copied;
 } TLS_CLIENT_T;
 
 static struct altcp_tls_config *tls_config = NULL;
@@ -84,18 +95,11 @@ static err_t tls_client_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *p, e
     }
 
     if (p->tot_len > 0) {
-        /* For simplicity this examples creates a buffer on stack the size of the data pending here, 
-           and copies all the data to it in one go.
-           Do be aware that the amount of data can potentially be a bit large (TLS record size can be 16 KB),
-           so you may want to use a smaller fixed size buffer and copy the data to it using a loop, if memory is a concern */
-        char buf[p->tot_len + 1];
+        state->copied = pbuf_copy_partial(p, state->buf, state->buf_len - 1, 0);
+        state->buf[state->copied] = '\0';
+        printf("received %d bytes; copied %d bytes\n", p->tot_len, state->copied);
 
-        pbuf_copy_partial(p, buf, p->tot_len, 0);
-        buf[p->tot_len] = 0;
-
-        printf("***\nnew data received from server:\n***\n\n%s\n", buf);
-
-        altcp_recved(pcb, p->tot_len);
+        altcp_recved(pcb, state->copied);
     }
     pbuf_free(p);
 
@@ -130,7 +134,6 @@ static void tls_client_dns_found(const char* hostname, const ip_addr_t *ipaddr, 
     }
 }
 
-
 static bool tls_client_open(const char *hostname, void *arg) {
     err_t err;
     ip_addr_t server_ip;
@@ -143,7 +146,7 @@ static bool tls_client_open(const char *hostname, void *arg) {
     }
 
     altcp_arg(state->pcb, state);
-    altcp_poll(state->pcb, tls_client_poll, state->timeout * 2);
+    altcp_poll(state->pcb, tls_client_poll, state->timeout);
     altcp_recv(state->pcb, tls_client_recv);
     altcp_err(state->pcb, tls_client_err);
 
@@ -152,10 +155,6 @@ static bool tls_client_open(const char *hostname, void *arg) {
 
     printf("resolving %s\n", hostname);
 
-    // cyw43_arch_lwip_begin/end should be used around calls into lwIP to ensure correct locking.
-    // You can omit them if you are in a callback from lwIP. Note that when using pico_cyw_arch_poll
-    // these calls are a no-op and can be omitted, but it is a good practice to use them in
-    // case you switch the cyw43_arch type later.
     cyw43_arch_lwip_begin();
 
     err = dns_gethostbyname(hostname, &server_ip, tls_client_dns_found, state);
@@ -186,8 +185,8 @@ static TLS_CLIENT_T* tls_client_init(void) {
     return state;
 }
 
-bool run_tls_client_test(const uint8_t *cert, size_t cert_len, const char *server, const char *request, int timeout) {
-
+int https_get(const char *server, const char *path, const uint8_t *cert, size_t cert_len, char *buf, size_t buf_len)
+{
     /* No CA certificate checking */
     tls_config = altcp_tls_create_config_client(cert, cert_len);
     assert(tls_config);
@@ -196,13 +195,29 @@ bool run_tls_client_test(const uint8_t *cert, size_t cert_len, const char *serve
 
     TLS_CLIENT_T *state = tls_client_init();
     if (!state) {
-        return false;
+        altcp_tls_free_config(tls_config);
+        return -1;
     }
-    state->http_request = request;
-    state->timeout = timeout;
+
+    int res = snprintf(state->http_request, TLS_HTTP_GET_MAX_SIZE, TLS_HTTP_GET_TEMPLATE, path, server);
+    if (res < 0 || res >= TLS_HTTP_GET_MAX_SIZE) {
+        free(state);
+        altcp_tls_free_config(tls_config);
+        return -1;
+    }
+    state->timeout = TLS_CLIENT_TIMEOUT_SECS;
+    state->buf = buf;
+    state->buf_len = buf_len; // leave room for null terminator
+    state->copied = 0;
+
+    printf("Sending GET: %s\n", state->http_request);
+
     if (!tls_client_open(server, state)) {
-        return false;
+        free(state);
+        altcp_tls_free_config(tls_config);
+        return -1;
     }
+
     while(!state->complete) {
         // the following #ifdef is only here so this same example can be used in multiple modes;
         // you do not need it in your code
@@ -220,8 +235,8 @@ bool run_tls_client_test(const uint8_t *cert, size_t cert_len, const char *serve
         sleep_ms(1000);
 #endif
     }
-    int err = state->error;
+
     free(state);
     altcp_tls_free_config(tls_config);
-    return err == 0;
+    return state->error;
 }

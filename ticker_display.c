@@ -36,7 +36,7 @@ void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
 
     // Draw left ticker
     snprintf(buf, BUF_LEN, "%.2f", ticker1->price);
-    Paint_DrawString_EN(0, 0, ticker1->symbol, &Font24, WHITE, BLACK);
+    Paint_DrawString_EN(0, 0, ticker1->alias, &Font24, WHITE, BLACK);
     Paint_DrawString_EN(0, 25, buf, &Font24, WHITE, BLACK);
 
     // Draw right ticker
