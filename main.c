@@ -20,6 +20,8 @@ int main(void)
         return 1;
     }
 
+    cyw43_wifi_pm(&cyw43_state, CYW43_AGGRESSIVE_PM);
+
     cyw43_arch_enable_sta_mode();
 
     if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
