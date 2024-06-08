@@ -19,6 +19,7 @@ bool get_ticker(const char *symbol, const char *alias, ticker *ticker)
 
     strncpy(ticker->symbol, symbol, TICKER_LEN);
     strncpy(ticker->alias, alias, TICKER_LEN);
+    ticker->price = -3.14; // Initial value meaning error
 
     int ret = snprintf(path_buffer, sizeof(path_buffer), YF_PATH, symbol);
     if (ret < 0 || ret >= sizeof(path_buffer))
