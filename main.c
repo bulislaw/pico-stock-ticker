@@ -2,6 +2,9 @@
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "pico/cyw43_arch.h"
+#include "pico/sleep.h"
+#include "hardware/rtc.h"
+
 #include "ticker.h"
 #include "ticker_display.h"
 #include "battery.h"
@@ -11,7 +14,6 @@
 int main(void)
 {
     stdio_init_all();
-    display_init();
 
     if (cyw43_arch_init()) {
         puts("Failed to initialise WiFi\n");
@@ -40,7 +42,11 @@ int main(void)
             puts("Fetching SPX ticker data failed\n");
         }
 
-        display_tickers(&arm, &spx, get_battery());
+        int battery = get_battery();
+
+        printf("Update: ARM: %f, SPX: %f, Bat: %d\%\n", arm.price, spx.price, battery);
+
+        display_tickers(&arm, &spx, battery);
         sleep_ms(5000);
     }
 

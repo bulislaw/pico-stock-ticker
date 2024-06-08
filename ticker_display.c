@@ -9,15 +9,20 @@
 
 UBYTE fb[FB_SIZE];
 
+bool initialized = false;
+
 bool display_init()
 {
-    if(DEV_Module_Init()!=0){
-        return false;
+    if (initialized == false) {
+        if(DEV_Module_Init()!=0){
+            return false;
+        } else {
+            initialized = true;
+        }
     }
 
     EPD_2in13_V4_Init();
     EPD_2in13_V4_Clear();
-    DEV_Delay_ms(500);
 
     return true;
 }
@@ -25,6 +30,9 @@ bool display_init()
 void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
 {
     char buf[BUF_LEN + 1];
+
+    display_init();
+
     Paint_NewImage(fb, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 270, WHITE);
     Paint_SelectImage(fb);
     // Paint_SetMirroring(MIRROR_HORIZONTAL);
@@ -56,4 +64,5 @@ void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
             EPD_2in13_V4_WIDTH - 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
 
     EPD_2in13_V4_Display(fb);
+    EPD_2in13_V4_Sleep();
 }
