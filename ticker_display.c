@@ -41,7 +41,7 @@ void display_tickers(ticker *ticker1, ticker *ticker2, int battery)
 
     // Draw right ticker
     snprintf(buf, BUF_LEN, "%.2f", ticker2->price);
-    Paint_DrawString_EN(EPD_2in13_V4_HEIGHT / 2, 0, ticker2->symbol, &Font24, WHITE, BLACK);
+    Paint_DrawString_EN(EPD_2in13_V4_HEIGHT / 2, 0, ticker2->alias, &Font24, WHITE, BLACK);
     Paint_DrawString_EN(EPD_2in13_V4_HEIGHT / 2, 25, buf, &Font24, WHITE, BLACK);
 
     // Draw a battery indicator in the bottom right corner, with one dot per 20% of the battery
